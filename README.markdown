@@ -5,16 +5,38 @@ file formats developed for use with node.js such as CoffeeScript, SASS, and
 Jade. With Babel, you will be able to seamlessly load from many different 
 types of files without having to worry about the many APIs involved.
 
+## Features
+
+ + Easily load stylesheets, data, templates, and scripts from many popular formats
+ + Never worry about format lock-in
+ + Experiment with different formats with ease
+
+## Installation
+
+To install babel, use npm
+
+	npm install babel
+	
+Then Babel can easily be included into any node.js project
+
+	Babel = require("babel");
+
 ## Methods
 
 ### Babel.template(file, callback)
 
-A template defines a reusable snippet of HTML which can be rendered many times
-with different sets of values.
+Load and convert a template file into a JavaScript function.
+
+A template is a snippet of HTML which can be used many times with different
+values.
 
 `file` is an absolute path to the template file and `callback` is a function 
-which will be invoked as `callback(err, render)`. The `render` function passed
-to `callback` can be used to render the template with any values or context.
+which will be called as `callback(err, template)` after the file is loaded
+and converted. 
+
+The `template` function returned to `callback` can be used to render the 
+template with a `values` object and a `context` object by calling
+`template.call(context, values)`.
 
 #### Example
 
@@ -44,8 +66,17 @@ Now, `output` will equal `<h1>hello world</h1>`
 
 ### Babel.data(file, callback)
 
-A data file contains a static serialized representation of a JavaScript object.
-These are generally used for configuration, not actual data storage.
+Load and convert a data file into a JavaScript object
+
+A data file contains a serialized JavaScript object. Since these files are
+static (you cannot easily write to them) they are typically used for storing
+settings or unchanging data.
+
+`file` is an absolute path to the data file and `callback` is a function 
+which will be invoked as `callback(err, data)` after the data is loaded and
+converted. 
+
+The `data` object returned to `callback` is a JavaScript object.
 
 #### Example
 
@@ -71,8 +102,17 @@ now `data` will equal `{ username: "root", "password": "asdf" }`
 
 ### Babel.script(file, callback)
 
-A script is a file containing some form of code which can be run multiple times
-with different values. The script has the ability to accept values and a context.
+Load and convert a script into a JavaScript function.
+
+A script is a file containing code. This code is compiled into a JavaScript
+function which can be run multiple times with different values and contexts.
+
+`file` is an absolute path to the script and `callback` is a function 
+which will be invoked as `callback(err, script)`. 
+
+The `script` function returned to `callback` can be used to run the 
+script with a `values` object and a `context` object by calling
+`script.call(context, values)`.
 
 #### Example
 
@@ -88,7 +128,7 @@ you could load it with
 
 and run the script with
 
-	var events = script.call({ min: 0 }, { max: 10 });
+	var evens = script.call({ min: 0 }, { max: 10 });
 	
 now `evens` will equal `[ 0, 2, 4, 6, 8, 10 ]`
 
@@ -99,12 +139,19 @@ now `evens` will equal `[ 0, 2, 4, 6, 8, 10 ]`
 
 ### Babel.stylesheet(file, callback)
 
+Load a convert a stylesheet into a string of CSS rules.
+
 A stylesheet is any file that defines the visual appearance of a HTML document
 that can be translated into CSS.
 
+`file` is an absolute path to the stylesheet file and `callback` is a function 
+which will be invoked as `callback(err, css)`. 
+
+The `css` string contains valid CSS rules ready to be inserted into the document
+
 #### Example
 
-If you had a SCSS stylesheet
+If you had a LESS stylesheet
 
 	.blog-post {
 		h2 { color: red; }
@@ -121,20 +168,24 @@ now `css` will equal `".blog-post h2 { color: red }"`
 #### Supported Formats
 
  + CSS (*.css)
-
-
+ + LESS (*.less)
+ + SCSS (*.scss)
+ + Stylus (*.styl)
 
 ### Babel.dir(dir, iterator, callback)
 
-Utility method to load a directory full of files in one step. For a use case,
-see the **Loading a Directory of Templates** example above.
+Load all files in a directory in one step.
 
-This method will call `iterator` for each file found in `dir` as 
-`iterator(file, callback)`. The iterator the asynchronously loads the file and
-calls its `callback` with the result.
+Call `iterator` for each file in `dir` as `iterator(file, callback)`. 
+The iterator can then asynchronously load the file and call `callback` 
+with the result. *(note: this is not the same `callback` as is passed to 
+`Babel.dir`)*. All results are gathered into a JavaScript object as 
+`{ <file basename>: <result>, ... }` and passed to `callback`
 
-All results are gathered into a JavaScript object as `{ fileNames: result, ... }`
-and passed to `callback`
+This method works very well with all Babel load methods -- just use them as 
+the iterator
+
+	Babel.dir(dir, Babel.template, function(err, templates) { ... }
 
 #### Example
 
@@ -146,14 +197,13 @@ If you you have a folder full of templates
 		header.eco
 		footer.ejs
 		
-you could load and convert each template to a `render(values)` function in
-one step with
+you can load all templates in one step with
 
 	Babel.dir(dir, Babel.template, function(err, templates) {
 		// ...
 	});
 
-`templates` will look like
+`templates` will equal
 
 	{
 		body: function(values) { ... },
@@ -162,44 +212,45 @@ one step with
 		footer: function(values) { ... }
 	}
 
-## Translators
+## Creating Translators
 
-Translators contain the instructions for converting a specific file format 
-into a standardized data structure.
+Translators contain the instructions for converting a specific file type 
+(defined by the file extension) into a standardized data structure.
 
-More specifically, a translator is function invoked by Babel as
-`translator(source, callback)`, where `source` is the raw text of the file 
-being translated. This function is run asynchronously to convert the source 
-into a data structure as defined per file type in the sections below.
+A translator is function invoked by Babel as `translator(source, callback)`, 
+where `source` is the raw contents of the file being translated. This function 
+is run asynchronously to convert the source into a data structure (as defined
+per file type in the sections below).
 
-The code for the translators is located at 
-`./translators/<type>/<extension>.coffee` where `<extension>` refers to the 
-literal file extension of a file of that type. For example, the JSON data 
-translator is located at `./translators/data/json.coffee`
+Translators are located at `./translators/<type>/<extension>.coffee` where 
+`<extension>` refers to the file extension a file of that type would have. For
+example, the JSON data translator is located at `translators/data/json.coffee`
 
 ### Data
 
-Data translators return a JavaScript object representation of the source data
+Data translators should return a JavaScript object representation of the source.
 
 ### Script
 
-A script translator returns a function of the signature `run(values)`
-where `values` is an object to be used as the local scope when rendering the 
+A script translator returns a function of the signature `script(values)`.
+ 
+`values` is an object to be used as the local scope when running the 
 script (presumably inside a `with(values) { ... }` block). This function
-should also support being invoked as `run.call(context, values)`. 
+should also support being run as `script.call(context, values)`. 
 
 Values returned in the script's execution by `return` statements should be 
-returned from the `run(values)` function.
+returned from the `script(values)` function.
 
 ### Stylesheet
 
-A stylesheet translator should return a string of W3C valid CSS3 rules.
+A stylesheet translator should return a string of W3C valid CSS rules.
 
 ### Template
 
-Template translator returns a function of the signature `render(values)`
-where `values` is an object to be used as the local scope when rendering the 
-template (presumably inside a `with(values) { ... }` block). This function
-should also support being invoked as `render.call(context, values)`.
+A template translator should return a function of the signature `render(values)`
 
-Take care not to break the `.toString()` compatibility of the function.
+`values` is an object to be used as the local scope when rendering the 
+template (presumably inside a `with(values) { ... }` block). This function
+should also support being run as `template.call(context, values)`.
+
+The template should still work after being passed through `template.toString()`

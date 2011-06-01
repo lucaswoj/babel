@@ -9,47 +9,37 @@ module.exports = Babel =
 
 	# ### Babel.template( file, callback )
 	#
-	# Load the template file at `file`, process it, then invoke `callback` as
-	# `callback( err, template )`. The template will be put into a function as
-	# `render(locals)`, where `locals` is an object to serve as the local 
-	# scope of the template during rendering. The context of the template can 
-	# also be easily changed also by calling `render.call(context, locals)`
+	# Load and convert a template file
 	
 	template: (file, callback) ->
 		Babel.typedFile("template", file, callback)
 	
 	# ### Babel.data( file, callback )
 	#
-	# Load the data file at `file`, process it, then invoke `callback` as
-	# `callback( err, data )`. The data will be returned as a JavaScript object.
+	# Load and convert a data file
 	
 	data: (file, callback) ->
 		Babel.typedFile("data", file, callback)
 	
 	# ### Babel.data( file, callback )
 	#
-	# Load the script file at `file`, process it, then invoke `callback` as
-	# `callback( err, data )`. The script will be put into a function as
-	# `script(locals)`, where `locals` is an object to serve as the local 
-	# scope of the script during execution. The context of the script can 
-	# also be easily changed also by calling `script.call(context, locals)`
+	# Load and convert a script file
 	
 	script: (file, callback) ->
 		Babel.typedFile("script", file, callback)
 	
 	# ### Babel.stylesheet( file, callback )
 	#
-	# Load the stylesheet at `file`, process it, then invoke `callback` as
-	# `callback( err, css )`. The stylesheet will be returned as a string 
-	# containing CSS rules.
+	# Load and convert a stylesheet
 	
 	stylesheet: (file, callback) ->
 		Babel.typedFile("stylesheet", file, callback)
 	
 	# ### Babel.typedFile( type, file, callback )
 	# 
-	# Load a typed file and the appropriate translator. Translate the file's
-	# source and return the result.
+	# Load a file of a specific type (determined by the file extension)
+	# and load the appropriate translator. Run the file's contents through the
+	# translator and return the result
 
 	typedFile: (type, file, callback) ->
 		
