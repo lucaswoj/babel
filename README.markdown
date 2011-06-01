@@ -224,7 +224,8 @@ per file type in the sections below).
 
 Translators are located at `./translators/<type>/<extension>.coffee` where 
 `<extension>` refers to the file extension a file of that type would have. For
-example, the JSON data translator is located at `translators/data/json.coffee`
+example, the JSON data translator is located at `translators/data/json.coffee`.
+The translator function should be placed into `module.exports`.
 
 ### Data
 
