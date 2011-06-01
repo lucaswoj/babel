@@ -1,8 +1,3 @@
-# Babel puts a soft cushion between a web application and the many cool new 
-# file formats developed for use with node.js such as CoffeeScript, SASS, and 
-# Jade. With Babel, you will be able to seamlessly load from many different 
-# types of files without having to worry about the many APIs involved.
-
 Fs = require("fs")
 Path = require("path")
 Step = require("step")
