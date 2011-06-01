@@ -39,7 +39,12 @@ module.exports = Babel =
 	# 
 	# Load a file of a specific type (determined by the file extension)
 	# and load the appropriate translator. Run the file's contents through the
-	# translator and return the result
+	# translator and return the result.
+	#
+	# If the file does not exist, pass an empty string into the translator to
+	# get a "default" value
+	#
+	# If the translator doesn't exist, return null
 
 	typedFile: (type, file, callback) ->
 		
@@ -71,10 +76,8 @@ module.exports = Babel =
 	
 	# ### Babel.translator( type, extension, callback )
 	#
-	# Load a translator function from its file at 
-	# `../translators/<type>/<extension>.coffee`. This file exports a function
-	# which is cached then in the `@translators[type]` object. If a translator
-	# for a requested file type does not exist, create a closure
+	# Lazyload translators as they are needed. If a translator
+	# for a requested file type does not exist, use a function
 	# that always returns null in its place.
 	
 	translator: (type, extension, callback) ->
@@ -87,10 +90,9 @@ module.exports = Babel =
 
 		else
 			file = Path.join(@translatorsDir, type, "#{extension}.coffee")
-			Path.exists file, (exists) =>
-				translator = if exists then require(file) else (-> null)
-				@translators[type][extension] = translator
-				callback(null, translator)
+			translator = require(file)
+			@translators[type][extension] = translator
+			callback(null, translator)
 			
 	
 	# ## Load Directory		
