@@ -3,7 +3,7 @@ EcoPreprocessor = require("eco/preprocessor")
 
 module.exports = (source, callback) ->
 	
-	new Function("__values", Coffee.compile("""
+	fn = new Function("__values", Coffee.compile("""
 		
 		_output = []
 
@@ -27,3 +27,5 @@ module.exports = (source, callback) ->
 		return _output.join("")
 			
 	""", bare: true))
+	
+	callback(null, fn)

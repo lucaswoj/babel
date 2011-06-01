@@ -1,5 +1,6 @@
 Coffee = require("coffee-script")
 
-module.exports = (source) ->
+module.exports = (source, callback) ->
 	js = Coffee.compile("return (#{ source })", bare: true)
-	new Function("__values", "with(__values || {}) { #{ js } }")
+	fn = new Function("__values", "with(__values || {}) { #{ js } }")
+	callback(null, fn)

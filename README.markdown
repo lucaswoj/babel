@@ -167,10 +167,10 @@ one step with
 Translators contain the instructions for converting a specific file format 
 into a standardized data structure.
 
-More specifically, a translator is function invoked by Babel as `translator(source)`, 
-where `source` is the raw text of the file being translated. This function
-is run synchronously to convert the source into a data structure as defined 
-per file type in the sections below.
+More specifically, a translator is function invoked by Babel as
+`translator(source, callback)`, where `source` is the raw text of the file 
+being translated. This function is run asynchronously to convert the source 
+into a data structure as defined per file type in the sections below.
 
 The code for the translators is located at 
 `./translators/<type>/<extension>.coffee` where `<extension>` refers to the 

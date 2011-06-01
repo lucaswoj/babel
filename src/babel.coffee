@@ -60,7 +60,9 @@ module.exports = Babel =
 			Babel.plain(file, @parallel())
 			
 		, (err, translator, source) ->
-			callback(err, translator(source))
+			translator(source, @)
+			
+		, callback
 			
 	# ## Load Plain Text
 	#

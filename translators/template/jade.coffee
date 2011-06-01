@@ -1,4 +1,4 @@
 Jade = require("jade")
 
-module.exports = (source) ->
-	Jade.compile(source)
+module.exports = (source, callback) ->
+	callback(null, Jade.compile(source))
